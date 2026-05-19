@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 // func init() {
@@ -173,7 +172,8 @@ import (
 // 	fmt.Println(passByVal(tmp))
 // 	fmt.Println(tmp)
 // 	/*
-// 		classic pass by value example in Go :
+// 		classic pass by value example in Go
+// 		pass by value means value of
 // 		pass by value means copy of the variable will be passed
 // 		but the original variable will not change
 // 		that is why the output 18 then 17
@@ -335,6 +335,333 @@ https://gobyexample.com/interfaces
 // 	return "Wrong Code", fmt.Errorf("invalid OTP, please try again")
 // }
 
-func main() {
-	fmt.Println(time.Now().Clock())
+// func main() {
+// 	fmt.Println(time.Now().Clock())
+// 	/* Prints the time in hh mm ss format */
+// }
+
+// func main() {
+// 	/*
+// 		How Go language is pass by value and not pass by reference
+// 	*/
+// 	x := 5
+// 	y := x
+// 	y = 2
+// 	fmt.Println(x, y)
+// 	/*
+// 		y changes because y is working on a copy of x
+// 		and is pointing to a different referene in the memory
+
+// 	*/
+// }
+
+// func main() {
+// 	x := 2
+// 	x = increment(x)
+// 	fmt.Println(x)
+// }
+
+// func increment(x int) int {
+// 	return x + 1
+// }
+
+/*
+in Go statement is not equal to expression
+statement performs an action
+whereas expression evaluates to a value
+*/
+
+// Another example of pass by value
+
+// func main() {
+// 	sendsSoFar := 500
+// 	const sendsToAdd = 5
+// 	incrementSends(sendsSoFar, sendsToAdd)
+// 	fmt.Println(sendsSoFar)
+// }
+
+// func incrementSends(sendsSoFar int, sendsToAdd int) {
+// 	sendsSoFar = sendsSoFar + sendsToAdd
+// }
+
+/*
+Output should be 505 if it was pass by reference
+unlike the actual output
+*/
+
+/*
+In Go functions can return multiple values
+if your function returns multiple values then
+you should destructure the return values accordingly
+like
+func() (int, string) {
+	return 17, "Swapnil"
 }
+	you can also ignore the return value using "_"
+	so you only get the value which you are interested in
+*/
+
+// func main() {
+// 	name, _ := exp()
+// 	fmt.Println(name)
+// }
+
+// func exp() (string, int) {
+// 	return "swapnil", 172
+// }
+
+/*
+
+In Go lang we can also name our return values
+so we dont have to return them explicitly
+In Go, you can give names to return values in the function signature.
+meaning :
+ 	normal return :
+	func add(a int, b int) int {
+		return a + b
+	}
+
+}
+	// named return :
+	func add(a int, b int) (res int) {
+		res = a + b
+		return
+	}
+
+	named return values hold their initial default values
+	eg int : 0
+	eg string : ""
+	eg bool : false
+	eg slice : nil
+	eg map : nil
+	eg pointer : nil
+
+	also if you use return statement without any return value
+	it will automatically return the named return variables with their default values
+
+
+*/
+
+// func main() {
+// 	var alive, name, age = ret()
+// 	fmt.Println(alive, name, age)
+// }
+
+// func ret() (alive bool, name string, age int) {
+// 	return
+// }
+
+// type OS interface {
+// 	boot() string
+// }
+
+// type Windows struct {
+// 	hwinfo string
+// 	ipk    string
+// }
+
+// type Linux struct {
+// 	hwinfo  string
+// 	verinfo string
+// }
+
+// // decoupled service layer
+// func boot(o OS) string {
+// 	return o.boot()
+// }
+
+// // specialized implemented methods for respective types
+// func (w Windows) boot() string {
+// 	return "Booting Windows | HW: " + w.hwinfo + " | IPK: " + w.ipk
+// }
+
+// func (l Linux) boot() string {
+// 	return "Booting Linux | HW: " + l.hwinfo + " | Version: " + l.verinfo
+// }
+
+// func main() {
+// 	// initializing strut fields
+// 	win := Windows{hwinfo: "i5 11th Gen", ipk: "9562-2258-5521"}
+// 	lin := Linux{hwinfo: "i7 12th Gen", verinfo: "5.17.0-0424-generic"}
+
+// 	fmt.Println(boot(win))
+// 	fmt.Println(boot(lin))
+// }
+
+// func main() {
+// 	a := 172
+// 	fmt.Println(memAddr(a))
+// }
+
+// Function which returns the memory address of a variable
+// func memAddr(a int) *int {
+// 	return &a
+// }
+
+// GO language allows functions to be called before they are defined
+// because GO compiler resolves function declarations at package scope
+// meaning order of functions in the source code doesn't matter
+// unlike variables
+
+func init() {
+	fmt.Println("Executed Init Function..")
+}
+
+// type Vehicle interface {
+// 	drive()
+// }
+
+// type Vehicle interface {
+// 	drive()
+// }
+
+// type Car struct {
+// 	c string
+// }
+
+// type Truck struct {
+// 	t string
+// }
+
+// func (c Car) drive() {
+// 	fmt.Println("Driving ", c)
+// }
+
+// func (t Truck) drive() {
+// 	fmt.Println("Driving ", t)
+// }
+
+// // This function wouldn't have been possible if there was no interface
+// // This service layer(function) helps loosely decouple the logic
+// func Driving(v Vehicle) {
+// 	v.drive()
+// 	fmt.Println("Driving", v)
+// }
+
+// func main() {
+// 	c := Car{c: "car"}
+// 	t := Truck{t: "truck"}
+// 	Driving(c)
+// 	Driving(t)
+// }
+
+// func otpCheck(otp int) (string, error) {
+// 	if otp == 1729 {
+// 		return "Code Accepted!", nil
+// 	}
+// 	return "", errors.New("Invalid OTP, retry later")
+// }
+
+/*
+this function implements the error handling well in GO.
+Now to handle both the return values well,
+it is important to caputure both the return values
+else both the values will be returned as a tupple
+*/
+
+// func main() {
+// 	fmt.Println("Enter OTP")
+// 	var otp int
+// 	fmt.Scan(&otp)
+// 	fmt.Println(otpCheck(otp))
+// 	// avoid this type of code else it will be returned as tupple
+// }
+
+// func otpCheck(otp int) (string, error) {
+// 	if otp == 1729 {
+// 		return "Code Accepted!", nil
+// 	}
+// 	return "", errors.New("Invalid OTP, retry later")
+// }
+
+// func main() {
+// 	fmt.Println("Enter OTP")
+// 	var otp int
+// 	fmt.Scan(&otp)
+
+// 	// Capture the return values from otpCheck
+// 	message, err := otpCheck(otp)
+
+// 	// Check for error and print the appropriate message
+// 	if err != nil {
+// 		// Print error if OTP is incorrect
+// 		fmt.Println("Error:", err)
+// 	} else {
+// 		// Print success message if OTP is correct
+// 		fmt.Println(message)
+// 	}
+// }
+
+// func main() {
+// 	nums := [3]int{11, 17, 67}
+// 	fmt.Println(nums[1])
+// 	fmt.Println(nums[2])
+// 	var o *int = &nums[0]
+// 	var p *int = &nums[1]
+// 	var q *int = &nums[2]
+
+// 	fmt.Println(o, p, q)
+// }
+
+// func cp() {
+// 	fmt.Println("Counting Primes..")
+// }
+
+// func greeting(func greet(msg string) string) string {
+// 	return msg
+// }
+
+// func main() {
+
+// 	message, result := bmi(30, func(text string) string {
+// 		return text + " Swapnil"
+// 	})
+
+// 	fmt.Println(message, result)
+// }
+
+// func greet(string) string {
+// 	return "Hello Nancy"
+// }
+
+// func main() {
+// 	var age int = 172
+// 	var pointer *int
+// 	pointer = &age
+// 	fmt.Println(pointer, age)
+// }]
+
+// func main() {
+// 	go func() {
+// 		fmt.Println("This is an anonymous function")
+// 	}()
+// 	fmt.Println("Hi from Main fn")
+// 	time.Sleep(1000)
+// }
+
+/*
+
+FLOW :
+
+1. main starts
+2. go func() creates a new goroutine
+3. main does not wait
+4. main prints "Hi from Main fn"
+5. goroutine may run after that
+
+// Hi from main fn executed first
+// because main does not wait for the goroutine to finish
+// it spawns the goroutine and continues executing the next line of code
+
+and using the sleep function we can make sure
+that the main function does not exit
+before the goroutine has a chance to execute
+
+
+GO Scheduler is responsible for managing the execution of goroutines
+it schedules the goroutines to run on available OS threads
+and manages their execution in a way that allows for concurrent execution
+Since go scheduler is fast it immidiately
+schedules the goroutine for that function and exits the main function
+
+*/
