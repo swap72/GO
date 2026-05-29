@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // func init() {
@@ -285,6 +286,7 @@ then the struct type is said to be implementing the interface
 
 Basically Struct Should obey the contract of that interface
 https://gobyexample.com/interfaces
+
 */
 
 // func main() {
@@ -503,9 +505,9 @@ meaning :
 // meaning order of functions in the source code doesn't matter
 // unlike variables
 
-func init() {
-	fmt.Println("Executed Init Function..")
-}
+// func init() {
+// 	fmt.Println("Executed Init Function..")
+// }
 
 // type Vehicle interface {
 // 	drive()
@@ -665,3 +667,379 @@ Since go scheduler is fast it immidiately
 schedules the goroutine for that function and exits the main function
 
 */
+
+// func main() {
+// 	mail := make(chan bool)
+// 	go func() {
+// 		mail <- true
+// 	}()
+// 	isMailSent := <-mail
+// 	if isMailSent {
+// 		fmt.Println("Mail was Sent!")
+// 	} else {
+// 		fmt.Println("Mail was not sent retry")
+// 	}
+// 	fmt.Println(isMailSent)
+// }
+
+/*
+
+Channels
+
+A send operation on an unbuffered channel blocks the sending goroutine
+(in our case the main / master go routine)
+until another goroutine performs a receive on the same channel, and vice-versa.
+
+
+If the send operation happens inside the main function,
+then the main goroutine is the one that blocks.
+
+In Go, the main function itself runs inside its own goroutine
+(often called the master or main goroutine).
+It obeys the exact same rules as any other goroutine you create with the go keyword.
+
+Here is a look at what happens under the hood
+when the main goroutine gets blocked by an unbuffered channel:
+
+Scenario 1: Total Deadlock (The Program Crashes)
+If you try to send data to an unbuffered channel in the main function,
+but you haven't started another goroutine to read from it,
+the main goroutine blocks forever.
+
+Because Go has a built-in deadlock detector,
+it notices that no other goroutines are alive to unblock it,
+and it crashes the program.
+
+
+Scenario 2: Successful Handshake (How to fix it)
+To prevent the main goroutine from blocking forever,
+you must spawn a separate goroutine before you try sending data.
+That way, when the main goroutine blocks on the send line,
+the background goroutine is alive and available to pull the data out,
+completing the handshake.
+
+Unbuffered Channels (The Default)
+When you call make(chan int), you get an unbuffered channel.
+
+Behavior: Unbuffered channels have no capacity to hold data.
+
+Synchronization: A send operation on an unbuffered channel
+blocks the sending goroutine until another goroutine
+performs a receive on the same channel,
+and vice-versa. This behaves like a synchronous handshake.
+
+The Golden Rule of Unbuffered Channels
+An unbuffered channel can never hold onto data by itself.
+Think of it like a baton pass in a relay race.
+The runner (the sender) cannot let go of the baton
+until the next runner (the receiver) physically puts their hand on it.
+If there is no other runner there, the sender is stuck standing still.
+
+
+Always Remember : Spawn the Goroutine first and then feed the value
+
+*/
+
+// func main() {
+// 	gr1 := make(chan string)
+// 	go func() {
+// 		gr1 <- "This message is for Agent 57"
+// 	}()
+// 	capVal := <-gr1
+// 	fmt.Println(capVal)
+// }
+
+// func main() {
+// 	// gr1 := make(chan int)
+// 	// gr1 <- 101
+// 	// val1 := <-gr1
+// 	// fmt.Println(val1)
+
+// 	gr1 := make(chan int, 1)
+// 	gr1 <- 101
+// 	//val1 := <-gr1
+// 	//fmt.Println(val1)
+// 	fmt.Println(<-gr1)
+// 	//fmt.Println(<-gr1)
+// }
+
+/*
+
+I will accept value only when receiver is ready.
+This is why we get error when
+we use buffered channel from the main function
+
+unbuffered channel has no storage space,
+that is why sending without having receiver
+causes deadlock
+
+however buffered or unbuffered
+channel does not hold any values
+once it has given the value
+to access again declare a variable
+and copy that value into that
+variable to use it again
+
+*/
+
+// func worker(done chan bool) {
+// 	fmt.Println("Working")
+// 	time.Sleep(time.Second)
+// 	fmt.Println("done")
+
+// 	done <- true
+// }
+
+// func main() {
+// 	done := make(chan bool)
+
+// 	go worker(done)
+
+// 	<-done
+// }
+
+// func worker(done chan bool) {
+// 	fmt.Println("Worker Thread working...")
+// 	time.Sleep(time.Second * 3)
+// 	fmt.Println("Worker Go routine has completed it's work")
+// 	done <- true
+// }
+
+// func main() {
+// 	done := make(chan bool)
+// 	go worker(done)
+// 	var1 := <-done
+// 	fmt.Println(var1)
+// }
+
+/*
+
+[Main Thread]                             [Background Goroutine]
+     |                                              |
+     |--- (go worker) ----------------------------->|
+     |                                              |-- Prints "working..."
+     |-- Hits `<-done` (BLOCKED)                    |-- Sleeps for 1 second
+     |   [Waiting...]                               |   [Sleeping...]
+     |   [Waiting...]                               |-- Prints "done"
+     |   [Waiting...]                               |-- Sends `true` to channel
+     |<-- Unblocks via channel ---------------------|
+     |
+     X (Program ends safely)
+
+
+*/
+
+// func main() {
+// 	ch1 := make(chan string)
+// 	ch2 := make(chan string)
+
+// 	go func() {
+// 		ch1 <- "Msg for channel 1"
+// 	}()
+
+// 	go func() {
+// 		ch2 <- "Msg for channel 2"
+// 	}()
+
+// 	select {
+// 	case msg1 := <-ch1:
+// 		fmt.Println(msg1)
+// 	case msg2 := <-ch2:
+// 		fmt.Println(msg2)
+// 	}
+// }
+
+/*
+Selects are like Switch but for channels
+in multiple cases GO chooses one randomly
+GO routine scheduler decides which one to choose
+
+Without select, if you wait on one channel,
+your program may get stuck there
+even though another channel already has data
+
+With Select, Go waits for both channels.
+Whichever becomes ready first, that case runs.
+*/
+
+// func main() {
+// 	validate := make(chan int)
+// 	go func() {
+// 		var otp int
+// 		fmt.Scan(&otp)
+// 		validate <- otp
+// 	}()
+
+// 	val := <-validate
+// 	if val == 1729 {
+// 		fmt.Println("The OTP is valid")
+// 	} else {
+// 		fmt.Println("Invalid OTP")
+// 	}
+
+// }
+
+// func main() {
+// 	jobs := make(chan int, 5)
+// 	done := make(chan bool)
+
+// 	go func() {
+// 		for {
+// 			j, more := <-jobs
+// 			if more {
+// 				fmt.Println("job received ", j)
+// 			} else {
+// 				fmt.Println("received all jobs")
+// 				done <- true
+// 				return
+// 			}
+// 		}
+// 	}()
+// 	for j := 1; j <= 3; j++ {
+// 		jobs <- j
+// 		fmt.Println("Job Sent ", j)
+// 	}
+// 	close(jobs)
+// 	fmt.Println("All Jobs Sent")
+// 	<-done
+// }
+
+/*
+Classic Synchronisation Example :
+this demonstrates proper synchronisation in sequence
+*/
+// func drivingCar(driving chan bool) {
+// 	fmt.Println("Elder son driving Car")
+// 	driving <- true
+// }
+
+// func parkedCar(driving chan bool, done chan bool) {
+// 	<-driving
+// 	fmt.Println("Elder son Parked the Car")
+// 	done <- true
+// }
+
+// func main() {
+// 	driving := make(chan bool)
+// 	done := make(chan bool)
+
+// 	go drivingCar(driving)
+// 	go parkedCar(driving, done)
+
+// 	<-done
+// }
+
+/*
+we can use ranges over channels,
+also keep receving from the channel
+so that the buffer is not full
+*/
+// func main() {
+// 	queues := make(chan string, 3)
+// 	queues <- "one"
+// 	queues <- "two"
+// 	queues <- "three"
+// 	close(queues)
+// 	for e := range queues {
+// 		fmt.Println(e)
+// 	}
+// }
+
+// func main() {
+// 	timer := time.NewTimer(2 * time.Second)
+
+// 	fmt.Println("Waiting...")
+// 	/*
+// 		This is timer as channel
+// 		as the timer completes it's time
+// 		GO sends the current time into
+// 		that channel
+// 	*/
+// 	fmt.Println(<-timer.C)
+
+// 	fmt.Println("Timer finished")
+// }
+
+// func main() {
+// 	ticker := time.NewTicker(time.Second * 2)
+// 	for i := 1; i <= 30; i++ {
+// 		t := <-ticker.C
+// 		fmt.Println("Tick at ", t)
+// 	}
+// }
+
+// Worker Pool Pattern
+// func workerPool(id int, jobs <-chan int, res chan<- int) {
+// 	for j := range jobs {
+// 		fmt.Println("Worker", id, "Started Job ", j)
+// 		time.Sleep(time.Second)
+// 		fmt.Println("Worker", id, "Finished Job ", j)
+// 		res <- j * 2
+// 	}
+// }
+
+// func main() {
+// 	const numjobs = 5
+// 	jobs := make(chan int)
+// 	results := make(chan int)
+
+// 	for w := 1; w <= 3; w++ {
+// 		go workerPool(w, jobs, results)
+// 	}
+
+// 	for i := 1; i <= numjobs; i++ {
+// 		jobs <- i
+// 	}
+// 	close(jobs)
+// 	for j := 1; j <= numjobs; j++ {
+
+// 	}
+
+// }
+
+// func main() {
+// 	chan1 := make(chan bool)
+// 	chan1 <- true
+// 	go func() {
+// 		receive := <-chan1
+// 		fmt.Println(receive)
+// 	}()
+// 	fmt.Println("Hello from main")
+// }
+
+// func main() {
+// 	chan1 := make(chan bool)
+// 	go func() {
+// 		receive := <-chan1
+// 		fmt.Println(receive)
+// 	}()
+// 	chan1 <- true
+// 	fmt.Println("Hello from main")
+// }
+
+/*
+Because in an unbuffered channel,
+receiving first does not fail.
+It simply waits.
+
+Receiving first is okay → receiver waits.
+Sending first is also okay only if receiver is already running somewhere.
+
+But if sender and receiver are in same sequential flow,
+the first blocking operation stops everything.
+*/
+
+func main() {
+	fcc := func() {
+		fmt.Println("Functions are first class citizens")
+	}
+	fcc()
+	fmt.Println(reflect.TypeOf(fcc)) // func()
+	ch1 := make(chan func())
+	go func() {
+		ch1 <- fcc
+	}()
+	v1 := <-ch1
+	v1()
+	fmt.Println(v1)
+}
