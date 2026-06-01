@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"reflect"
-)
-
 // func init() {
 // 	fmt.Println("This function runs even before the Main function")
 // }
@@ -1029,17 +1024,99 @@ But if sender and receiver are in same sequential flow,
 the first blocking operation stops everything.
 */
 
-func main() {
-	fcc := func() {
-		fmt.Println("Functions are first class citizens")
-	}
-	fcc()
-	fmt.Println(reflect.TypeOf(fcc)) // func()
-	ch1 := make(chan func())
-	go func() {
-		ch1 <- fcc
-	}()
-	v1 := <-ch1
-	v1()
-	fmt.Println(v1)
-}
+/*
+Bad code teaches you more than the working code
+below is one such example
+we are creating dedicated channels
+for both sending and receiving boolean messages
+if the go routines spawn in the right sequence
+code might work as intended but
+this is not garunteed at runtime always
+because go routine must and should receive
+the message by someone from the channel
+if it is sent into the channel this is
+the rule of thumb for the go routines
+*/
+// func main() {
+// 	ch1 := make(chan bool)
+// 	go func() {
+// 		ch1 <- true
+// 	}()
+// 	go func() {
+// 		<-ch1
+// 		v1 := <-ch1
+// 		fmt.Println(v1)
+// 	}()
+// 	v2 := <-ch1
+// 	fmt.Println(v2)
+// }
+
+/*
+To avoid go routines deadlock
+make sure the sender and receiver
+and in different channels
+*/
+// func main() {
+// 	ch := make(chan int)
+// 	ch <- 10
+// 	value := <-ch
+// 	fmt.Println(value)
+// }
+
+// func main() {
+// 	ch1 := make(chan func())
+// 	go func() {
+// 		ch1 <- func() {
+// 			fmt.Println("Sending function to a channel")
+// 			fmt.Println(ch1)
+// 			time.Sleep(time.Second * 3)
+// 		}
+// 	}()
+// 	go func() {
+// 		f1 := <-ch1
+// 		f1()
+// 	}()
+// 	time.Sleep(time.Second * 2)
+// }
+
+// func main() {
+// 	ch1 := make(chan bool)
+// 	go func() {
+// 		ch1 <- false
+// 	}()
+// 	v1 := <-ch1
+// 	if v1 == false {
+// 		fmt.Println("Value Changed")
+// 	} else {
+// 		fmt.Println("Value remains same")
+// 	}
+// }
+
+// func main() {
+// 	chan1 := make(chan string)
+// 	// This works fine
+// 	go func() {
+// 		fmt.Println(<-chan1)
+// 		fmt.Println("Hello from separeate GO routine")
+// 	}()
+// 	chan1 <- "Message 247"
+
+// 	time.Sleep(time.Second * 2)
+// }
+
+/*
+The two main GO routine points you need to keep in mind is
+1. For unbuffered channels, sender and receiver must be in different active goroutines ✅
+2. Do not send first and receive later in the same goroutine ✅
+Always remember : sending first will block the current GO routine
+*/
+
+// func main() {
+// 	chan1 := make(chan string)
+// 	go func() {
+// 		chan1 <- "Message 247"
+// 		fmt.Println("Hello from separeate GO routine")
+// 	}()
+// 	fmt.Println(<-chan1)
+// 	// Even this shit works fine
+// }
