@@ -1120,3 +1120,90 @@ Always remember : sending first will block the current GO routine
 // 	fmt.Println(<-chan1)
 // 	// Even this shit works fine
 // }
+
+/*
+This code below partially solves the sync problem
+So the channel synchronized only the handover of value,
+not the order of print statements after the handover.
+
+Unbuffered channel synchronizes send and receive only.
+After send/receive completes,
+both goroutines run independently.
+If you need print/order control,
+use another channel signal or WaitGroup.
+
+sync works perfectly up until the point where boolean value is trnasfered
+After that point,
+Go scheduler decides which goroutine gets CPU first.
+
+sender waits until receiver is ready
+receiver waits until sender is ready
+*/
+
+/*
+In this code below,
+But because ch1 is unbuffered,
+it cannot store true boolean value
+
+So the send operation pauses here
+until some other goroutine reaches: <-ch1
+
+flow :
+
+goroutine 1 reaches: ch1 <- true
+goroutine 1 tries to send true
+
+but no receiver is ready yet
+(receiver has to be immediately available,
+because it is unbuffered channel
+and there is no buffer storage,
+to store the value
+into temporary storage)
+
+so goroutine 1 waits at this line
+
+goroutine 2 runs
+prints: Two
+goroutine 2 reaches: <-ch1
+
+now receiver is ready
+true is transferred from goroutine 1 to goroutine 2
+
+goroutine 1 is released
+goroutine 1 prints: One
+
+ch1 <- true waits until the receive happens.
+Only after receive happens, the send is considered complete.
+*/
+// func main() {
+// 	ch1 := make(chan bool)
+// 	go func() {
+// 		ch1 <- true
+// 		fmt.Println("One")
+// 	}()
+// 	go func() {
+// 		fmt.Println("Two")
+// 		<-ch1
+// 	}()
+// 	time.Sleep(time.Second * 1)
+// }
+
+/*
+func main() {
+	ch1 := make(chan bool)
+	done := make(chan bool)
+
+	go func() {
+		ch1 <- true
+		fmt.Println("One")
+		done <- true
+	}()
+
+	go func() {
+		fmt.Println("Two")
+		<-ch1
+	}()
+
+	<-done
+}
+*/
