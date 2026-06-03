@@ -1189,21 +1189,71 @@ Only after receive happens, the send is considered complete.
 // }
 
 /*
-func main() {
-	ch1 := make(chan bool)
-	done := make(chan bool)
-
-	go func() {
-		ch1 <- true
-		fmt.Println("One")
-		done <- true
-	}()
-
-	go func() {
-		fmt.Println("Two")
-		<-ch1
-	}()
-
-	<-done
-}
+Synchronisation without time.sleep and waitgroups
+using unbuffered send and receive channels
 */
+
+/*
+What below code does :
+
+main creates ch1 and done channels.
+goroutine 1 tries to send true into ch1 and waits because ch1 is unbuffered.
+goroutine 2 prints "Two", then receives from ch1.
+Once goroutine 2 receives, goroutine 1's send is completed.
+Then goroutine 1 prints "One", sends true into done.
+main receives from done and exits.
+*/
+// func main() {
+// 	ch1 := make(chan bool)
+// 	done := make(chan bool)
+
+// 	go func() {
+// 		ch1 <- true
+// 		fmt.Println("One")
+// 		done <- true
+// 	}()
+
+// 	go func() {
+// 		fmt.Println("Two")
+// 		<-ch1
+// 	}()
+// 	<-done
+// }
+
+/*
+go routines in this below code
+are in-sync without time.sleep
+and without wait group
+
+Control flow :
+1. main starts
+2. main creates ch1 and done
+
+3. main starts goroutine 1
+4. main starts goroutine 2
+
+5. main reaches <-done
+   main is blocked here
+
+6. goroutine 1 prints "Two"
+
+7. goroutine 1 reaches:
+   ch1 <- true
+
+   Because ch1 is unbuffered, it waits until someone receives.
+*/
+// func main() {
+// 	ch1 := make(chan bool)
+// 	done := make(chan bool)
+
+// 	go func() {
+// 		fmt.Println("one")
+// 		ch1 <- true
+// 	}()
+// 	go func() {
+// 		<-ch1
+// 		fmt.Println("two")
+// 		done <- true
+// 	}()
+// 	<-done
+// }
