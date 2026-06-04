@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // func init() {
 // 	fmt.Println("This function runs even before the Main function")
 // }
@@ -1257,3 +1259,85 @@ Control flow :
 // 	}()
 // 	<-done
 // }
+
+// func main() {
+// 	ch1 := make(chan bool)
+// 	ch2 := make(chan bool)
+// 	done := make(chan bool)
+// 	go func() {
+// 		fmt.Println("One")
+// 		ch1 <- true
+// 	}()
+// 	go func() {
+// 		<-ch1
+// 		fmt.Println("Two")
+// 		ch2 <- true
+// 	}()
+// 	go func() {
+// 		<-ch2
+// 		fmt.Println("Three")
+// 		done <- true
+// 	}()
+// 	<-done
+// }
+
+// func main() {
+// 	ch1 := make(chan bool)
+// 	ch2 := make(chan bool)
+// 	ch3 := make(chan bool)
+// 	ch4 := make(chan bool)
+// 	done := make(chan bool)
+
+// 	go func() {
+// 		fmt.Println("One")
+// 		ch1 <- true
+// 	}()
+// 	go func() {
+// 		<-ch1
+// 		fmt.Println("Two")
+// 		ch2 <- true
+// 	}()
+// 	go func() {
+// 		<-ch2
+// 		fmt.Println("Three")
+// 		ch3 <- true
+// 	}()
+// 	go func() {
+// 		<-ch3
+// 		fmt.Println("Four")
+// 		ch4 <- true
+// 	}()
+// 	go func() {
+// 		<-ch4
+// 		fmt.Println("Five")
+// 		done <- true
+// 	}()
+// 	<-done
+// }
+
+func main() {
+	u1 := make(chan bool)
+	u2 := make(chan bool)
+	allUsersDone := make(chan bool)
+	go func() {
+		fmt.Println("Ram Entered the ATM")
+		fmt.Println("Ram Using the ATM")
+		fmt.Println("Ram Exits the ATM")
+		u1 <- true
+	}()
+	go func() {
+		<-u1
+		fmt.Println("Shyam Entered the ATM")
+		fmt.Println("Shyam Using the ATM")
+		fmt.Println("Shyam Exits the ATM")
+		u2 <- true
+	}()
+	go func() {
+		<-u2
+		fmt.Println("Kishan Entered the ATM")
+		fmt.Println("Kishan Using the ATM")
+		fmt.Println("Kishan Exits the ATM")
+		allUsersDone <- true
+	}()
+	<-allUsersDone
+}
