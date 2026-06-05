@@ -1315,29 +1315,111 @@ Control flow :
 // 	<-done
 // }
 
+// func main() {
+// 	u1 := make(chan bool)
+// 	u2 := make(chan bool)
+// 	allUsersDone := make(chan bool)
+// 	go func() {
+// 		fmt.Println("Ram Entered the ATM")
+// 		fmt.Println("Ram Using the ATM")
+// 		fmt.Println("Ram Exits the ATM")
+// 		u1 <- true
+// 	}()
+// 	go func() {
+// 		<-u1
+// 		fmt.Println("Shyam Entered the ATM")
+// 		fmt.Println("Shyam Using the ATM")
+// 		fmt.Println("Shyam Exits the ATM")
+// 		u2 <- true
+// 	}()
+// 	go func() {
+// 		<-u2
+// 		fmt.Println("Kishan Entered the ATM")
+// 		fmt.Println("Kishan Using the ATM")
+// 		fmt.Println("Kishan Exits the ATM")
+// 		allUsersDone <- true
+// 	}()
+
+/*
+If you don't use the sleep timer,
+the main go routine exits early
+resulting in printing the old value of value1 variable
+
+timer function delays the main so that
+it can print the updated value
+//try commenting the timer to verify
+*/
+// func main() {
+// 	var value1 int = 17
+// 	go func() {
+// 		for i := 1; i <= 5; i++ {
+// 			value1 = value1 + 1
+// 		}
+// 	}()
+// 	time.Sleep(time.Second * 1)
+// 	fmt.Println(value1)
+// }
+
+/*
+Typical race condition scenario in GO
+9k is a perfect value if you also want
+to see right output as equally as wrong output
+but it also largely depends on the
+machine to machine cores and compute power
+but the core idea is to avoid taking
+very large and very small values for evident data race
+*/
+
+// func main() {
+// 	var count int = 0
+// 	go func() {
+// 		for i := 1; i <= 3000; i++ {
+// 			count++
+// 		}
+// 	}()
+// 	go func() {
+// 		for i := 1; i <= 3000; i++ {
+// 			count++
+// 		}
+// 	}()
+// 	go func() {
+// 		for i := 1; i <= 3000; i++ {
+// 			count++
+// 		}
+// 	}()
+// 	time.Sleep(time.Second * 1)
+// 	fmt.Print(count)
+// }
+
+/*
+This data race problem
+is sovlved by wait groups,
+and Atomic Counters
+*/
+// Garunteed expected output
+
 func main() {
-	u1 := make(chan bool)
-	u2 := make(chan bool)
-	allUsersDone := make(chan bool)
-	go func() {
-		fmt.Println("Ram Entered the ATM")
-		fmt.Println("Ram Using the ATM")
-		fmt.Println("Ram Exits the ATM")
-		u1 <- true
-	}()
-	go func() {
-		<-u1
-		fmt.Println("Shyam Entered the ATM")
-		fmt.Println("Shyam Using the ATM")
-		fmt.Println("Shyam Exits the ATM")
-		u2 <- true
-	}()
-	go func() {
-		<-u2
-		fmt.Println("Kishan Entered the ATM")
-		fmt.Println("Kishan Using the ATM")
-		fmt.Println("Kishan Exits the ATM")
-		allUsersDone <- true
-	}()
+	//var count int = 0
+	var v atomic.Uint64
+	var w sync.WaitGroup
+	w.Go(func() {
+		for range 3000 {
+			v.Add(1)
+		}
+	})
+	w.Go(func() {
+		for range 3000 {
+			v.Add(1)
+		}
+	})
+	w.Go(func() {
+		for range 3000 {
+			v.Add(1)
+		}
+	})
+	w.Wait()
+	fmt.Print(v.Load())
+}
+
 	<-allUsersDone
 }
