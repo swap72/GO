@@ -91,3 +91,15 @@ use of atomic counter preffered
 // 		}
 // 	}
 // }
+
+func main() {
+	num, _ := strconv.ParseInt("428297479", 0, 64)
+	fmt.Println(num)
+	fmt.Println()
+}
+
+// type RAM struct {
+// 	var speed int
+// 	var memory int
+// 	var freq int
+// }
